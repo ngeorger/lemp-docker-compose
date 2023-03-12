@@ -1,0 +1,6 @@
+mariadb/*
+certs/*
+public/*
+.DS_Store
+**/.DS_Store
+phpdocker/nginx/

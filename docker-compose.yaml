@@ -1,0 +1,60 @@
+version: "3.1"
+services:
+    mariadb:
+      image: mariadb:10.4
+      container_name: elclaustro-mariadb
+      restart: unless-stopped
+      working_dir: /application
+      volumes:
+        - ./mariadb/databases:/var/lib/mysql
+        - .:/application
+      environment:
+        - MYSQL_ROOT_PASSWORD=n1c0l4SSS
+        - MYSQL_DATABASE=nueva
+        - MYSQL_USER=nueva
+        - MYSQL_PASSWORD=nueva
+      ports:
+        - "6033:3306"
+
+    webserver:
+      image: nginx:mainline-alpine
+      container_name: elclaustro-nginx
+      restart: unless-stopped
+      working_dir: /application
+      environment:
+       - PUID=1001
+       - PGID=1001
+       - UMASK_SET=022
+
+      volumes:
+          - .:/application
+          # CERTS
+          - ./phpdocker/nginx/certslocal/elclaustro.cl.crt:/etc/nginx/certs/elclaustro.cl.crt
+          - ./phpdocker/nginx/certslocal/elclaustro.cl.key:/etc/nginx/certs/elclaustro.cl.key
+          - ./phpdocker/nginx/certslocal/sweetcaroline.cl.key:/etc/nginx/certs/sweetcaroline.cl.key
+          - ./phpdocker/nginx/certslocal/sweetcaroline.cl.crt:/etc/nginx/certs/sweetcaroline.cl.crt
+          - ./phpdocker/nginx/certslocal/sredevops.cl.crt:/etc/nginx/certs/sredevops.cl.crt
+          - ./phpdocker/nginx/certslocal/sredevops.cl.key:/etc/nginx/certs/sredevops.cl.key
+          - ./phpdocker/nginx/certslocal/blackgoat.cl.crt:/etc/nginx/certs/blackgoat.cl.crt
+          - ./phpdocker/nginx/certslocal/blackgoat.cl.key:/etc/nginx/certs/blackgoat.cl.key
+          # CONFS NGINX 
+          - ./phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+          - ./phpdocker/nginx/sredevops.conf:/etc/nginx/conf.d/sredevops.conf
+          - ./phpdocker/nginx/blackgoat.conf:/etc/nginx/conf.d/blackgoat.conf
+          - ./phpdocker/nginx/elclaustro.conf:/etc/nginx/conf.d/elclaustro.conf
+          - ./phpdocker/nginx/sweetcaroline.conf:/etc/nginx/conf.d/sweetcaroline.conf
+      ports:
+       - "80:80"
+       - "443:443"
+
+    php-fpm:
+#      build: phpdocker/php-fpm
+      image: ngeorger/php74fpm:latest
+      container_name: elclaustro-php-fpm
+      restart: unless-stopped
+      working_dir: /application
+      volumes:
+        - .:/application
+        - ./phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/7.4/fpm/conf.d/99-overrides.ini
+#      ports:
+#        - "9000:9000"
